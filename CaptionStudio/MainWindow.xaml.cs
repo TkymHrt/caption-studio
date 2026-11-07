@@ -168,6 +168,11 @@ public sealed partial class MainWindow : Window
     private void OnLatestClicked(object sender, RoutedEventArgs args)
     {
         TranscriptScroll.Focus(FocusState.Programmatic);
+        ScrollToLatest();
+    }
+
+    private void ScrollToLatest()
+    {
         TranscriptScroll.ChangeView(null, TranscriptScroll.ScrollableHeight, null, true);
         UpdateLatestButton();
     }
@@ -300,11 +305,20 @@ public sealed partial class MainWindow : Window
 
     private void ShowFeedback(InfoBarSeverity severity, string message)
     {
-        if (!_closed)
+        if (_closed)
         {
-            SaveFeedback.Severity = severity;
-            SaveFeedback.Message = message;
-            SaveFeedback.IsOpen = true;
+            return;
+        }
+
+        var wasNearLatest = IsNearLatest();
+        SaveFeedback.Severity = severity;
+        SaveFeedback.Message = message;
+        SaveFeedback.IsOpen = true;
+
+        if (wasNearLatest)
+        {
+            TranscriptScroll.UpdateLayout();
+            ScrollToLatest();
         }
     }
 }

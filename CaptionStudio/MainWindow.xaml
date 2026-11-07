@@ -37,7 +37,7 @@
                   AutomationProperties.AutomationId="StudioTitleBar"
                   Title="Caption Studio">
             <TitleBar.IconSource>
-                <FontIconSource Glyph="&#xE8BA;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <FontIconSource Glyph="&#xE8BD;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
             </TitleBar.IconSource>
         </TitleBar>
 
@@ -102,6 +102,7 @@
                         AutomationProperties.Name="その他の操作"
                         ToolTipService.ToolTip="その他の操作"
                         Width="36"
+                        MinHeight="32"
                         Padding="0">
                     <SymbolIcon Symbol="More" />
                     <Button.Flyout>
