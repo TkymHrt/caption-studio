@@ -7,54 +7,199 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid Padding="24" RowSpacing="12" Loaded="OnLayoutLoaded">
+    <Grid Loaded="OnLayoutLoaded">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="WideToolbar">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="360" />
+                    </VisualState.StateTriggers>
+                </VisualState>
+                <VisualState x:Name="NarrowToolbar">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="CaptureStatusBadge.(Grid.Row)" Value="1" />
+                        <Setter Target="CaptureStatusBadge.(Grid.Column)" Value="0" />
+                        <Setter Target="CaptureStatusBadge.(Grid.ColumnSpan)" Value="4" />
+                        <Setter Target="CaptureStatusBadge.Margin" Value="0,6,0,0" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button x:Name="StartButton"
-                    AutomationProperties.AutomationId="StartCaptureButton"
-                    Click="OnStartClicked"
-                    Content="取得開始"
-                    Style="{StaticResource AccentButtonStyle}" />
-            <Button x:Name="StopButton"
-                    AutomationProperties.AutomationId="StopCaptureButton"
-                    Click="OnStopClicked"
-                    Content="取得停止"
-                    IsEnabled="False" />
-            <Button x:Name="SaveButton"
-                    AutomationProperties.AutomationId="SaveTranscriptButton"
-                    Click="OnSaveClicked"
-                    Content="TXT に保存"
-                    IsEnabled="False" />
-        </StackPanel>
+        <TitleBar x:Name="StudioTitleBar"
+                  AutomationProperties.AutomationId="StudioTitleBar"
+                  Title="Caption Studio">
+            <TitleBar.IconSource>
+                <FontIconSource Glyph="&#xE8BA;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+            </TitleBar.IconSource>
+        </TitleBar>
 
-        <TextBlock x:Name="StatusText"
-                   Grid.Row="1"
-                   AutomationProperties.AutomationId="CaptureStatus"
-                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                   Text="Win + Ctrl + L でライブ キャプションを開き、取得を開始してください。"
-                   TextWrapping="Wrap" />
+        <Grid Grid.Row="1" Padding="16,8,16,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Border Grid.Row="2"
-                Background="{ThemeResource ControlFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="4">
-            <ScrollViewer x:Name="TranscriptScroll" Padding="12">
-                <TextBlock x:Name="TranscriptText"
-                           AutomationProperties.AutomationId="TranscriptText"
-                           IsTextSelectionEnabled="True"
-                           TextWrapping="Wrap" />
-            </ScrollViewer>
-        </Border>
+            <Grid ColumnSpacing="8" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-        <InfoBar x:Name="SaveFeedback"
-                 Grid.Row="3"
-                 AutomationProperties.AutomationId="SaveFeedback" />
+                <Button x:Name="CaptureButton"
+                        AutomationProperties.AutomationId="CaptureButton"
+                        MinWidth="88"
+                        Click="OnCaptureClicked"
+                        Content="取得開始"
+                        Style="{StaticResource AccentButtonStyle}" />
+
+                <Border x:Name="CaptureStatusBadge"
+                        Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="12"
+                        Padding="8,3">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Grid VerticalAlignment="Center" Width="6" Height="6">
+                            <Ellipse Fill="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <Ellipse x:Name="LiveStatusDot"
+                                     Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                                     Visibility="Collapsed" />
+                        </Grid>
+                        <TextBlock x:Name="StatusText"
+                                   AutomationProperties.AutomationId="CaptureStatus"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Text="停止中" />
+                    </StackPanel>
+                </Border>
+
+                <Button x:Name="SaveButton"
+                        Grid.Column="2"
+                        AutomationProperties.AutomationId="SaveTranscriptButton"
+                        Click="OnSaveClicked"
+                        Content="TXT に保存"
+                        IsEnabled="False" />
+
+                <Button Grid.Column="3"
+                        AutomationProperties.AutomationId="MoreActionsButton"
+                        AutomationProperties.Name="その他の操作"
+                        ToolTipService.ToolTip="その他の操作"
+                        Width="36"
+                        Padding="0">
+                    <SymbolIcon Symbol="More" />
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Name="CopyMenuItem"
+                                            AutomationProperties.AutomationId="CopyTranscriptMenuItem"
+                                            Click="OnCopyClicked"
+                                            IsEnabled="False"
+                                            Text="全文をコピー">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="Copy" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <ToggleMenuFlyoutItem x:Name="AlwaysOnTopItem"
+                                                  AutomationProperties.AutomationId="AlwaysOnTopMenuItem"
+                                                  Click="OnAlwaysOnTopClicked"
+                                                  Text="常に手前に表示" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </Grid>
+
+            <TextBlock x:Name="CaptureHint"
+                       Grid.Row="1"
+                       AutomationProperties.AutomationId="CaptureHint"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Margin="0,0,0,10"
+                       TextWrapping="Wrap"
+                       Visibility="Collapsed" />
+
+            <Border Grid.Row="2"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+
+                    <Border BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="16,8">
+                        <TextBlock AutomationProperties.HeadingLevel="Level1"
+                                   Style="{StaticResource BodyStrongTextBlockStyle}"
+                                   Text="字幕" />
+                    </Border>
+
+                    <ScrollViewer x:Name="TranscriptScroll"
+                                  Grid.Row="1"
+                                  AutomationProperties.AutomationId="TranscriptScroll"
+                                  AutomationProperties.Name="字幕のスクロール領域"
+                                  HorizontalScrollMode="Disabled"
+                                  IsTabStop="True"
+                                  Padding="16,12"
+                                  SizeChanged="OnTranscriptSizeChanged"
+                                  VerticalScrollBarVisibility="Auto"
+                                  ViewChanged="OnTranscriptViewChanged">
+                        <TextBlock x:Name="TranscriptText"
+                                   AutomationProperties.AutomationId="TranscriptText"
+                                   FontSize="16"
+                                   IsTextSelectionEnabled="True"
+                                   LineHeight="26"
+                                   TextWrapping="Wrap" />
+                    </ScrollViewer>
+
+                    <TextBlock x:Name="EmptyTranscriptHint"
+                               Grid.Row="1"
+                               AutomationProperties.AutomationId="EmptyTranscriptHint"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               IsHitTestVisible="False"
+                               Margin="16"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap">
+                        <Run Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontWeight="SemiBold" Text="字幕がここに表示されます" />
+                        <LineBreak />
+                        <Run Text="Win + Ctrl + L でライブ キャプションを開く" />
+                    </TextBlock>
+
+                    <Button x:Name="LatestButton"
+                            Grid.Row="2"
+                            AutomationProperties.AutomationId="LatestCaptionButton"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Click="OnLatestClicked"
+                            Content="最新へ"
+                            Margin="12,0"
+                            Visibility="Collapsed" />
+                </Grid>
+            </Border>
+
+            <InfoBar x:Name="SaveFeedback"
+                     Grid.Row="3"
+                     AutomationProperties.AutomationId="SaveFeedback" />
+        </Grid>
     </Grid>
 </Window>
