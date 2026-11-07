@@ -54,7 +54,7 @@ public sealed partial class MainWindow : Window
         Grid.SetRow(CaptureStatusGroup, narrow ? 1 : 0);
         Grid.SetColumn(CaptureStatusGroup, narrow ? 0 : 1);
         Grid.SetColumnSpan(CaptureStatusGroup, narrow ? 4 : 1);
-        CaptureStatusGroup.Margin = narrow ? new Thickness(0, 8, 0, 0) : default;
+        CaptureStatusGroup.Margin = narrow ? new Thickness(0, 8, 0, 0) : new Thickness(4, 0, 0, 0);
     }
 
     private async void OnCaptureClicked(object sender, RoutedEventArgs args)

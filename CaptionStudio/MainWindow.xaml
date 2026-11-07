@@ -53,7 +53,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Orientation="Horizontal"
-                            Spacing="6">
+                            Spacing="4">
                     <Grid VerticalAlignment="Center" Width="6" Height="6">
                         <Ellipse Fill="{ThemeResource TextFillColorTertiaryBrush}" />
                         <Ellipse x:Name="LiveStatusDot"
@@ -84,16 +84,12 @@
                         Style="{StaticResource SubtleButtonStyle}">
                     <SymbolIcon Symbol="More" />
                     <Button.Flyout>
-                        <MenuFlyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <MenuFlyoutItem x:Name="CopyMenuItem"
                                             AutomationProperties.AutomationId="CopyTranscriptMenuItem"
                                             Click="OnCopyClicked"
                                             IsEnabled="False"
-                                            Text="全文をコピー">
-                                <MenuFlyoutItem.Icon>
-                                    <SymbolIcon Symbol="Copy" />
-                                </MenuFlyoutItem.Icon>
-                            </MenuFlyoutItem>
+                                            Text="全文をコピー" />
                             <ToggleMenuFlyoutItem x:Name="AlwaysOnTopItem"
                                                   AutomationProperties.AutomationId="AlwaysOnTopMenuItem"
                                                   Click="OnAlwaysOnTopClicked"
@@ -107,7 +103,7 @@
                        Grid.Row="1"
                        AutomationProperties.AutomationId="CaptureHint"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Margin="0,0,0,10"
+                       Margin="0,0,0,12"
                        TextWrapping="Wrap"
                        Visibility="Collapsed" />
 
@@ -120,7 +116,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="40" />
+                        <RowDefinition Height="48" />
                     </Grid.RowDefinitions>
 
                     <TextBlock AutomationProperties.HeadingLevel="Level1"
@@ -154,7 +150,7 @@
                                 IsHitTestVisible="False"
                                 Margin="16"
                                 MaxWidth="340"
-                                Spacing="10">
+                                Spacing="8">
                         <FontIcon AutomationProperties.AccessibilityView="Raw"
                                   FontSize="22"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -170,7 +166,7 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <Grid Grid.Row="2" ColumnSpacing="8" Margin="16,0">
+                    <Grid Grid.Row="2" ColumnSpacing="8" Margin="16,0,16,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -193,7 +189,7 @@
                                 VerticalAlignment="Center"
                                 Click="OnLatestClicked"
                                 Visibility="Collapsed">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
                                 <FontIcon FontSize="12" Glyph="&#xE74B;" />
                                 <TextBlock Text="最新へ" />
                             </StackPanel>
