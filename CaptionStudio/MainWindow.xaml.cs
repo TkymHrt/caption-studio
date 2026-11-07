@@ -37,6 +37,15 @@ public sealed partial class MainWindow : Window
         AppWindow.Resize(new SizeInt32((int)(560 * scale), (int)(460 * scale)));
     }
 
+    private void OnToolbarSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        var narrow = args.NewSize.Width < 328;
+        Grid.SetRow(CaptureStatusBadge, narrow ? 1 : 0);
+        Grid.SetColumn(CaptureStatusBadge, narrow ? 0 : 1);
+        Grid.SetColumnSpan(CaptureStatusBadge, narrow ? 4 : 1);
+        CaptureStatusBadge.Margin = narrow ? new Thickness(0, 6, 0, 0) : default;
+    }
+
     private async void OnCaptureClicked(object sender, RoutedEventArgs args)
     {
         if (_capture is not null)
