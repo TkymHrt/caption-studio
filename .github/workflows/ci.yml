@@ -12,8 +12,8 @@ jobs:
   verify:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v5
+      - uses: actions/checkout@v7.0.1
+      - uses: jdx/mise-action@v5.2.7
       - name: Restore
         run: mise exec -- dotnet restore CaptionStudio.slnx
       - name: Verify formatting

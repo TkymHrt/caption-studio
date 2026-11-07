@@ -24,6 +24,8 @@ npx --yes skills add 'https://github.com/nanaism/yomiyasu.git#v2.5.0' -a codex -
 
 ## 変更の検証
 
+GitHub Actions の `uses` を変更したら、`gh actions-lock` で `.github/workflows/actions.lock` を更新し、`gh actions-lock --verify` で確認する。
+
 Windows でリポジトリのルートに移動し、`mise install` に続けて次のコマンドを実行する。GitHub Actions でも同じコマンドで整形、ビルド、Roslyn の静的解析、単体テストを確認する。
 
 ```powershell
