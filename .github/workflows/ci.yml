@@ -1,0 +1,21 @@
+name: CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
+      - name: Restore
+        run: mise exec -- dotnet restore CaptionStudio.slnx
+      - name: Verify formatting
+        run: mise exec -- dotnet format CaptionStudio.slnx --verify-no-changes --no-restore
+      - name: Build and analyze
+        run: mise exec -- dotnet build CaptionStudio/CaptionStudio.csproj -c Release -p:Platform=x64 -p:GenerateAppxPackageOnBuild=false -warnaserror --no-restore
+      - name: Run unit tests
+        run: mise exec -- dotnet test CaptionStudio.Tests/CaptionStudio.Tests.csproj -c Release -p:TreatWarningsAsErrors=true --no-restore

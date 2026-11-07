@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "skills": {
+    "winapp-setup": {
+      "source": "microsoft/winappCli",
+      "ref": "v0.7.1",
+      "sourceType": "github",
+      "skillPath": "plugins/winapp/skills/winapp-setup/SKILL.md",
+      "computedHash": "f67f7f3d2545bc9f676684205e1bd0485e0bf91caaa0054c10547ea14f8c911f"
+    },
+    "winapp-ui-automation": {
+      "source": "microsoft/winappCli",
+      "ref": "v0.7.1",
+      "sourceType": "github",
+      "skillPath": "plugins/winapp/skills/winapp-ui-automation/SKILL.md",
+      "computedHash": "5b39d8a35300440645d0c83f7b8cfe71baca23eaa2dd8ff772d62eb08697a465"
+    },
+    "winui-design": {
+      "source": "microsoft/win-dev-skills",
+      "ref": "v0.7.1",
+      "sourceType": "github",
+      "skillPath": "plugins/winui/agent-plugin/skills/winui-design/SKILL.md",
+      "computedHash": "3b9846010fd9605051a898c08571c0ea748f35cb3e862a2eeb9714c4a98e1466"
+    },
+    "winui-dev-workflow": {
+      "source": "microsoft/win-dev-skills",
+      "ref": "v0.7.1",
+      "sourceType": "github",
+      "skillPath": "plugins/winui/agent-plugin/skills/winui-dev-workflow/SKILL.md",
+      "computedHash": "1964a3589a62a06128f3e9139b4f803dffeb09151ae9f803579aa2044c460318"
+    },
+    "winui-ui-testing": {
+      "source": "microsoft/win-dev-skills",
+      "ref": "v0.7.1",
+      "sourceType": "github",
+      "skillPath": "plugins/winui/agent-plugin/skills/winui-ui-testing/SKILL.md",
+      "computedHash": "a408f21c93e5780485ad8a3ceaa834d4dbceebe2ac4c259825b69b9add9adbf5"
+    }
+  }
+}
