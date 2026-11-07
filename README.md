@@ -2,22 +2,9 @@
 
 Windows 11 のライブ キャプションをリアルタイムで表示し、取得した字幕を UTF-8 の TXT ファイルに保存するアプリです。
 
-## 起動
+## ダウンロード
 
-Windows 11 x64 と mise が必要です。アプリを起動する前に Windows の開発者モードを有効にしてください。 [mise のインストール](https://mise.jdx.dev/)
-
-WinApp CLI 0.7.1 以降を用意してください。未導入の場合は、次のコマンドでインストールできます。
-
-```powershell
-winget install --id Microsoft.WinAppCli --exact
-```
-
-リポジトリのルートで次を実行してください。
-
-```powershell
-mise install
-mise exec -- winapp run CaptionStudio/CaptionStudio.csproj --arch x64
-```
+Windows 11 x64 向けの `CaptionStudio.exe` をダウンロードしてください。ファイル名はそのままで、ダブルクリックすると起動します。.NET と Windows App SDK のランタイムは EXE に含まれています。 [最新版のリリース](https://github.com/TkymHrt/caption-studio/releases/latest)
 
 ## 使い方
 
@@ -32,4 +19,19 @@ mise exec -- winapp run CaptionStudio/CaptionStudio.csproj --arch x64
 
 ## 開発
 
-実装方針と検証手順は [AGENTS.md](AGENTS.md) を参照してください。
+ソースから起動するには、Windows の開発者モードを有効にして、mise と WinApp CLI 0.7.1 以降を用意してください。 [mise のインストール](https://mise.jdx.dev/)
+
+WinApp CLI をインストールするには次を実行します。
+
+```powershell
+winget install --id Microsoft.WinAppCli --exact
+```
+
+リポジトリのルートで次を実行してください。
+
+```powershell
+mise install
+mise exec -- winapp run CaptionStudio/CaptionStudio.csproj --arch x64
+```
+
+実装方針、検証手順、配布用 EXE の作成手順は [AGENTS.md](AGENTS.md) を参照してください。

@@ -38,3 +38,16 @@ mise exec -- dotnet test CaptionStudio.Tests/CaptionStudio.Tests.csproj -c Relea
 - 字幕の差分処理を変えたら、訂正、表示範囲の移動、同じ字幕を続けて読み取った場合など、変更した挙動を単体テストで確認する。
 - UI を変えたら `winapp run` で起動し、`winapp ui` で取得の開始・停止、状態表示、保存した TXT の内容を確認する。日本語の字幕を検証するときはライブ キャプションと Caption Studio を同じ Windows セッションで起動する。日本語の音声を再生し、字幕を取得できることを確認する。
 - 実施できなかった検証は理由とともに報告する。変更は意味のまとまりごとにコミットする。
+
+## 配布用 EXE
+
+リポジトリのルートで Windows x64 向けの単体 EXE を作成する。`Version` はリリースタグから先頭の `v` を除いた値にする。
+
+```powershell
+mise exec -- dotnet publish CaptionStudio/CaptionStudio.csproj -c Release -r win-x64 --self-contained true `
+  -p:Platform=x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true `
+  -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true `
+  -p:GenerateAppxPackageOnBuild=false -p:Version=1.0.0 -warnaserror -o CaptionStudio/bin/publish/win-x64
+```
+
+出力された `CaptionStudio.exe` を別のフォルダーにコピーして起動を確認する。確認したファイルは同じ名前でリリースに添付する。
