@@ -42,6 +42,13 @@
       "sourceType": "github",
       "skillPath": "plugins/winui/agent-plugin/skills/winui-ui-testing/SKILL.md",
       "computedHash": "a408f21c93e5780485ad8a3ceaa834d4dbceebe2ac4c259825b69b9add9adbf5"
+    },
+    "yomiyasu": {
+      "source": "nanaism/yomiyasu",
+      "ref": "v2.5.0",
+      "sourceType": "github",
+      "skillPath": "skills/yomiyasu/SKILL.md",
+      "computedHash": "f469da1fb93b984e88bd8fd66bd1fe462b686f3867300fc243c57fdbacd1eae3"
     }
   }
 }

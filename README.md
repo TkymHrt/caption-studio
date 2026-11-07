@@ -1,59 +1,35 @@
 # Caption Studio
 
-Windows 11 のライブ キャプションをリアルタイムで表示し、UTF-8 のテキストファイルに保存する個人用アプリです。C#、.NET 10、WinUI 3 で構成し、Windows UI Automation で字幕を読み取ります。
+Windows 11 のライブ キャプションをリアルタイムで表示し、取得した字幕を UTF-8 の TXT ファイルに保存するアプリです。
 
 ## 起動
 
-Windows 11 x64、mise、WinApp CLI 0.7.1 以降が必要です。開発用パッケージの登録には Windows の開発者モードを使います。WinApp CLI は `winget install --id Microsoft.WinAppCli --exact` で導入できます。 [mise](https://mise.jdx.dev/)
+Windows 11 x64 と mise が必要です。アプリを起動する前に Windows の開発者モードを有効にしてください。 [mise のインストール](https://mise.jdx.dev/)
 
-リポジトリのルートで次を実行します。
+WinApp CLI 0.7.1 以降を用意してください。未導入の場合は、次のコマンドでインストールできます。
+
+```powershell
+winget install --id Microsoft.WinAppCli --exact
+```
+
+リポジトリのルートで次を実行してください。
 
 ```powershell
 mise install
 mise exec -- winapp run CaptionStudio/CaptionStudio.csproj --arch x64
 ```
 
-.NET SDK は `mise.toml` で管理します。起動用の .NET ランタイムはアプリに同梱されます。
-
 ## 使い方
 
-1. Caption Studio で **取得開始** を押すと、Windows のライブ キャプションを開いて接続します。すでに開いている場合は、そのウィンドウに接続します。
-2. 初回は Windows の画面に従い、ライブ キャプションの設定で日本語を選び、必要に応じて言語ファイルをダウンロードします。字幕欄に「接続待ち」と表示されたときは、`Win` + `Ctrl` + `L` で手動で開けます。 [Microsoft の設定手順](https://support.microsoft.com/ja-jp/accessibility/windows/use-live-captions-to-better-understand-audio)
-3. 同じボタンで取得を停止・再開できます。さかのぼって字幕を読んでいる間も取得は続き、**最新へ** を押すと末尾に戻って自動追従します。
-4. **全文コピー** で字幕をクリップボードにコピーします。**TXT に保存** では Windows の保存ダイアログで保存先を選びます。ボタンを押した時点の字幕を UTF-8（BOM なし）で書き出します。未保存の字幕がある状態で閉じると、保存するか確認します。
+1. 「取得開始」を押すと、Caption Studio がライブ キャプションを開いて接続します。すでに開いている場合は、そのウィンドウに接続します。
+2. 日本語の字幕を取得するには、ライブ キャプションの設定で日本語を選びます。Windows に言語ファイルのダウンロードを求められた場合は、画面の案内に従ってください。 [ライブ キャプションの設定手順](https://support.microsoft.com/ja-jp/accessibility/windows/use-live-captions-to-better-understand-audio)
+3. 「取得停止」で字幕の取得を止め、同じボタンで再開できます。再開時はライブ キャプションに残っている字幕から読み取ります。
+4. 「TXT に保存」を押して保存先を選びます。「全文コピー」を押すと、取得した字幕をクリップボードにコピーできます。未保存の字幕がある状態でアプリを閉じると、保存するか確認します。
 
-## 字幕取得の範囲
+過去の字幕を読んでいる間も取得は続きます。「最新へ」を押すと末尾に戻り、新しい字幕に合わせてスクロールします。
 
-ライブ キャプションの表示内容を約 250 ミリ秒間隔で読み取り、認識途中の書き換えと表示範囲の移動に追従します。保存の対象は UI Automation を通じて読み取れた字幕です。取得を再開すると、ライブ キャプションに残っている字幕から読み取ります。Windows の更新で字幕要素が変わる場合は取得先の見直しが必要です。
+「接続待ち」が続くときは、`Win` + `Ctrl` + `L` でライブ キャプションを開いてください。
 
-## 開発と検証
+## 開発
 
-GitHub Actions の Windows ジョブでビルド、Roslyn の静的解析、整形チェック、字幕更新の単体テストを実行します。ローカルではリポジトリのルートから次を実行します。
-
-```powershell
-mise exec -- dotnet restore CaptionStudio.slnx
-mise exec -- dotnet format CaptionStudio.slnx --verify-no-changes --no-restore
-mise exec -- dotnet build CaptionStudio/CaptionStudio.csproj -c Release -p:Platform=x64 -p:GenerateAppxPackageOnBuild=false -warnaserror --no-restore
-mise exec -- dotnet test CaptionStudio.Tests/CaptionStudio.Tests.csproj -c Release -p:TreatWarningsAsErrors=true --no-restore
-```
-
-実機での UI 検証では、WinApp CLI でウィンドウと要素を調べます。日本語音声を再生して、字幕の更新、停止後の表示、保存した TXT の内容を確認します。
-
-```powershell
-mise exec -- winapp run CaptionStudio/CaptionStudio.csproj --arch x64 --detach
-winapp ui list-windows -a CaptionStudio
-winapp ui inspect -a CaptionStudio --depth 8
-winapp ui invoke CaptureButton -a CaptionStudio
-winapp ui get-value CaptureStatus -a CaptionStudio
-winapp ui get-value TranscriptText -a CaptionStudio
-winapp ui invoke CaptureButton -a CaptionStudio
-winapp ui invoke SaveTranscriptButton -a CaptionStudio
-```
-
-アプリは `CaptionStudio/`、字幕更新のテストは `CaptionStudio.Tests/`、CI は `.github/workflows/ci.yml` にあります。
-
-## 参考にした実装
-
-- 字幕ウィンドウと字幕要素の UI Automation プロパティ。 [SaveLiveCaptions](https://github.com/LiveCaptionsHelper/SaveLiveCaptions/blob/main/src/function/texthook.py)
-- 表示範囲の移動に伴う文字列の重なりの扱い。 [LivecapSaver](https://github.com/SorMaze/LivecapSaver/blob/main/src/capture.rs)
-- 取得開始・停止とプレビューの操作を比較。 [Live-Caption-Saver](https://github.com/Tessie27/Live-Caption-Saver)
+実装方針と検証手順は [AGENTS.md](AGENTS.md) を参照してください。
