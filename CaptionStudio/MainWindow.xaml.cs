@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Automation;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.Storage.Pickers;
 using Windows.ApplicationModel.DataTransfer;
@@ -11,6 +12,15 @@ namespace CaptionStudio;
 
 public sealed partial class MainWindow : Window
 {
+    private enum CaptureState
+    {
+        Stopped,
+        WaitingForWindow,
+        WaitingForSpeech,
+        Capturing,
+        Reconnecting,
+    }
+
     private const double FollowDistance = 16;
     private readonly CaptionTranscript _transcript = new();
     private CancellationTokenSource? _capture;
@@ -23,6 +33,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SetCaptureStatus(CaptureState.Stopped);
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(StudioTitleBar);
         Closed += OnClosed;
@@ -40,10 +51,10 @@ public sealed partial class MainWindow : Window
     private void OnToolbarSizeChanged(object sender, SizeChangedEventArgs args)
     {
         var narrow = args.NewSize.Width < 328;
-        Grid.SetRow(CaptureStatusBadge, narrow ? 1 : 0);
-        Grid.SetColumn(CaptureStatusBadge, narrow ? 0 : 1);
-        Grid.SetColumnSpan(CaptureStatusBadge, narrow ? 4 : 1);
-        CaptureStatusBadge.Margin = narrow ? new Thickness(0, 6, 0, 0) : default;
+        Grid.SetRow(CaptureStatusGroup, narrow ? 1 : 0);
+        Grid.SetColumn(CaptureStatusGroup, narrow ? 0 : 1);
+        Grid.SetColumnSpan(CaptureStatusGroup, narrow ? 4 : 1);
+        CaptureStatusGroup.Margin = narrow ? new Thickness(0, 8, 0, 0) : default;
     }
 
     private async void OnCaptureClicked(object sender, RoutedEventArgs args)
@@ -57,7 +68,8 @@ public sealed partial class MainWindow : Window
         using var capture = new CancellationTokenSource();
         _capture = capture;
         CaptureButton.Content = "取得停止";
-        SetCaptureStatus("待機中");
+        ActionFeedback.Text = string.Empty;
+        SetCaptureStatus(CaptureState.WaitingForWindow);
 
         try
         {
@@ -73,7 +85,7 @@ public sealed partial class MainWindow : Window
             {
                 CaptureButton.Content = TranscriptText.Text.Length == 0 ? "取得開始" : "取得再開";
                 CaptureButton.IsEnabled = true;
-                SetCaptureStatus("停止中");
+                SetCaptureStatus(CaptureState.Stopped);
             }
         }
     }
@@ -112,16 +124,9 @@ public sealed partial class MainWindow : Window
                     _captionWindowHandle = windowHandle;
                 }
 
-                if (windowHandle == 0)
-                {
-                    SetCaptureStatus("待機中", TranscriptText.Text.Length == 0
-                        ? null
-                        : "Win + Ctrl + L でライブ キャプションを開いてください。");
-                }
-                else
-                {
-                    SetCaptureStatus(string.IsNullOrWhiteSpace(caption) ? "字幕待ち" : "取得中");
-                }
+                SetCaptureStatus(windowHandle == 0
+                    ? CaptureState.WaitingForWindow
+                    : string.IsNullOrWhiteSpace(caption) ? CaptureState.WaitingForSpeech : CaptureState.Capturing);
 
                 if (caption is not null && _transcript.Update(caption))
                 {
@@ -135,19 +140,38 @@ public sealed partial class MainWindow : Window
             catch (Exception exception) when (exception is COMException or UnauthorizedAccessException)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                SetCaptureStatus("再接続中", "字幕を読み取れません。再接続を試みています。");
+                SetCaptureStatus(CaptureState.Reconnecting);
             }
 
             await Task.Delay(250, cancellationToken);
         }
     }
 
-    private void SetCaptureStatus(string status, string? hint = null)
+    private void SetCaptureStatus(CaptureState state)
     {
+        var (status, title, detail) = state switch
+        {
+            CaptureState.WaitingForWindow => ("待機中", "ライブ キャプションの接続待ち", "Win + Ctrl + L でライブ キャプションを開いてください。"),
+            CaptureState.WaitingForSpeech => ("字幕待ち", "音声を待っています", "音声を再生すると、ここに字幕が表示されます。"),
+            CaptureState.Capturing => ("取得中", string.Empty, string.Empty),
+            CaptureState.Reconnecting => ("再接続中", "ライブ キャプションを再接続中", "字幕を読み取れません。接続が戻るまでお待ちください。"),
+            _ => ("停止中", "字幕の取得を始める", "Win + Ctrl + L でライブ キャプションを開き、［取得開始］を押してください。"),
+        };
+
+        if (StatusText.Text == status)
+        {
+            return;
+        }
+
         StatusText.Text = status;
-        LiveStatusDot.Visibility = status == "取得中" ? Visibility.Visible : Visibility.Collapsed;
-        CaptureHint.Text = hint ?? string.Empty;
-        CaptureHint.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
+        LiveStatusDot.Visibility = state == CaptureState.Capturing ? Visibility.Visible : Visibility.Collapsed;
+        EmptyTranscriptTitle.Text = title;
+        EmptyTranscriptDetail.Text = detail;
+
+        var showHint = TranscriptText.Text.Length > 0 && state is CaptureState.WaitingForWindow or CaptureState.Reconnecting;
+        CaptureHint.Text = showHint ? detail : string.Empty;
+        CaptureHint.Visibility = showHint ? Visibility.Visible : Visibility.Collapsed;
+        AnnounceLiveRegion(StatusText);
     }
 
     private void UpdateTranscript()
@@ -155,7 +179,7 @@ public sealed partial class MainWindow : Window
         var previousOffset = TranscriptScroll.VerticalOffset;
         var wasNearLatest = IsNearLatest();
         TranscriptText.Text = _transcript.Text;
-        EmptyTranscriptHint.Visibility = Visibility.Collapsed;
+        EmptyTranscriptState.Visibility = Visibility.Collapsed;
         CopyMenuItem.IsEnabled = true;
         SaveButton.IsEnabled = !_saving;
 
@@ -194,11 +218,11 @@ public sealed partial class MainWindow : Window
             data.SetText(TranscriptText.Text);
             Clipboard.SetContent(data);
             Clipboard.Flush();
-            ShowFeedback(InfoBarSeverity.Success, "字幕をクリップボードにコピーしました。");
+            ShowSuccess("字幕をクリップボードにコピーしました。");
         }
         catch (COMException)
         {
-            ShowFeedback(InfoBarSeverity.Error, "字幕をコピーできませんでした。");
+            ShowError("字幕をコピーできませんでした。もう一度お試しください。");
         }
     }
 
@@ -270,6 +294,7 @@ public sealed partial class MainWindow : Window
         _saving = true;
         SaveButton.IsEnabled = false;
         SaveFeedback.IsOpen = false;
+        ActionFeedback.Text = string.Empty;
 
         try
         {
@@ -294,12 +319,12 @@ public sealed partial class MainWindow : Window
 
             await File.WriteAllTextAsync(result.Path, text);
             _lastSavedTranscript = text;
-            ShowFeedback(InfoBarSeverity.Success, "字幕を保存しました。");
+            ShowSuccess("字幕を保存しました。");
             return true;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or COMException)
         {
-            ShowFeedback(InfoBarSeverity.Error, "字幕を保存できませんでした。保存先を確認してください。");
+            ShowError("字幕を保存できませんでした。保存先を確認してください。");
             return false;
         }
         finally
@@ -312,7 +337,17 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void ShowFeedback(InfoBarSeverity severity, string message)
+    private void ShowSuccess(string message)
+    {
+        if (!_closed)
+        {
+            SaveFeedback.IsOpen = false;
+            ActionFeedback.Text = message;
+            AnnounceLiveRegion(ActionFeedback);
+        }
+    }
+
+    private void ShowError(string message)
     {
         if (_closed)
         {
@@ -320,7 +355,7 @@ public sealed partial class MainWindow : Window
         }
 
         var wasNearLatest = IsNearLatest();
-        SaveFeedback.Severity = severity;
+        ActionFeedback.Text = string.Empty;
         SaveFeedback.Message = message;
         SaveFeedback.IsOpen = true;
 
@@ -330,4 +365,7 @@ public sealed partial class MainWindow : Window
             ScrollToLatest();
         }
     }
+
+    private static void AnnounceLiveRegion(TextBlock element) =>
+        FrameworkElementAutomationPeer.CreatePeerForElement(element)?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
 }
