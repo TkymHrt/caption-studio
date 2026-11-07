@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+AppX/
+AppPackages/
+*.user
+*.pfx
+.agents/skills/

@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="CaptionStudio.Tests/CaptionStudio.Tests.csproj" />
+  <Project Path="CaptionStudio/CaptionStudio.csproj" />
+</Solution>
