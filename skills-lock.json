@@ -1,6 +1,13 @@
 {
   "version": 1,
   "skills": {
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "ref": "engine-v0.1.19",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "a149f6321502631ef180eb193e713d434f126554ee01e342f6f6e7fb12002b62"
+    },
     "winapp-setup": {
       "source": "microsoft/winappCli",
       "ref": "v0.7.1",

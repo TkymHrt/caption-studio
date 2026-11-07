@@ -17,6 +17,16 @@ npx --yes skills add 'https://github.com/microsoft/win-dev-skills.git#v0.7.1' -a
 npx --yes skills add 'https://github.com/microsoft/winappCli.git#v0.7.1' -a codex --skill winapp-ui-automation --skill winapp-setup -y
 ```
 
+## Impeccable
+
+UI を整えるときは、必要に応じて Impeccable の `polish` を WinUI の余白、文字、配色、状態表示の見直しに使う。実画面と操作は WinApp CLI で検証する。
+
+プロジェクトに再導入するには、リポジトリのルートで次を実行する。`engine-v0.1.19` は導入元を固定するタグで、スキルのメタデータ上のバージョンは `4.8.0`。
+
+```powershell
+npx --yes skills add 'https://github.com/pbakaus/impeccable.git#engine-v0.1.19' -a codex --skill impeccable -y
+```
+
 ## 変更の検証
 
 - `mise install` で `mise.toml` の .NET SDK を用意する。コマンドと実機検証の手順は [README.md](README.md#開発と検証) に従う。
