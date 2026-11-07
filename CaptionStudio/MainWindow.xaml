@@ -15,11 +15,7 @@
 
         <TitleBar x:Name="StudioTitleBar"
                   AutomationProperties.AutomationId="StudioTitleBar"
-                  Title="Caption Studio">
-            <TitleBar.IconSource>
-                <FontIconSource Glyph="&#xE8BD;" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </TitleBar.IconSource>
-        </TitleBar>
+                  Title="Caption Studio" />
 
         <Grid Grid.Row="1" Padding="16,8,16,16">
             <Grid.RowDefinitions>
