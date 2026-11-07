@@ -17,12 +17,10 @@ mise exec -- winapp run CaptionStudio/CaptionStudio.csproj --arch x64
 
 ## 使い方
 
-1. `Win` + `Ctrl` + `L` で Windows のライブ キャプションを開きます。ライブ キャプションの設定で日本語を選び、初回は必要に応じて言語ファイルをダウンロードします。 [Microsoft の設定手順](https://support.microsoft.com/ja-jp/accessibility/windows/use-live-captions-to-better-understand-audio)
-2. Caption Studio で **取得開始** を押します。ライブ キャプションが閉じている間は待機し、開くと自動で接続します。
+1. Caption Studio で **取得開始** を押すと、Windows のライブ キャプションを開いて接続します。すでに開いている場合は、そのウィンドウに接続します。
+2. 初回は Windows の画面に従い、ライブ キャプションの設定で日本語を選び、必要に応じて言語ファイルをダウンロードします。字幕欄に「接続待ち」と表示されたときは、`Win` + `Ctrl` + `L` で手動で開けます。 [Microsoft の設定手順](https://support.microsoft.com/ja-jp/accessibility/windows/use-live-captions-to-better-understand-audio)
 3. 同じボタンで取得を停止・再開できます。さかのぼって字幕を読んでいる間も取得は続き、**最新へ** を押すと末尾に戻って自動追従します。
-4. **TXT に保存** を押し、Windows の保存ダイアログで保存先を選びます。ボタンを押した時点の字幕を UTF-8（BOM なし）で書き出します。未保存の字幕がある状態で閉じると、保存するか確認します。
-
-**その他の操作**（`…`）では、字幕の全文コピーと、ウィンドウの最前面表示の切り替えができます。最前面表示は起動時にオフです。
+4. **全文コピー** で字幕をクリップボードにコピーします。**TXT に保存** では Windows の保存ダイアログで保存先を選びます。ボタンを押した時点の字幕を UTF-8（BOM なし）で書き出します。未保存の字幕がある状態で閉じると、保存するか確認します。
 
 ## 字幕取得の範囲
 

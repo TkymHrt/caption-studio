@@ -24,7 +24,6 @@
         <Grid Grid.Row="1" Padding="16,8,16,16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -33,8 +32,6 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -48,66 +45,25 @@
                         Content="取得開始"
                         Style="{StaticResource AccentButtonStyle}" />
 
-                <StackPanel x:Name="CaptureStatusGroup"
+                <StackPanel x:Name="TranscriptActions"
                             Grid.Column="1"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
                             Orientation="Horizontal"
-                            Spacing="4">
-                    <Grid VerticalAlignment="Center" Width="6" Height="6">
-                        <Ellipse Fill="{ThemeResource TextFillColorTertiaryBrush}" />
-                        <Ellipse x:Name="LiveStatusDot"
-                                 Fill="{ThemeResource SystemFillColorSuccessBrush}"
-                                 Visibility="Collapsed" />
-                    </Grid>
-                    <TextBlock x:Name="StatusText"
-                               AutomationProperties.AutomationId="CaptureStatus"
-                               AutomationProperties.LiveSetting="Polite"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Style="{StaticResource CaptionTextBlockStyle}" />
+                            Spacing="8">
+                    <Button x:Name="CopyButton"
+                            AutomationProperties.AutomationId="CopyTranscriptButton"
+                            Click="OnCopyClicked"
+                            Content="全文コピー"
+                            IsEnabled="False" />
+                    <Button x:Name="SaveButton"
+                            AutomationProperties.AutomationId="SaveTranscriptButton"
+                            Click="OnSaveClicked"
+                            Content="TXT に保存"
+                            IsEnabled="False" />
                 </StackPanel>
-
-                <Button x:Name="SaveButton"
-                        Grid.Column="2"
-                        AutomationProperties.AutomationId="SaveTranscriptButton"
-                        Click="OnSaveClicked"
-                        Content="TXT に保存"
-                        IsEnabled="False" />
-
-                <Button Grid.Column="3"
-                        AutomationProperties.AutomationId="MoreActionsButton"
-                        AutomationProperties.Name="その他の操作"
-                        ToolTipService.ToolTip="その他の操作"
-                        Width="36"
-                        MinHeight="32"
-                        Padding="0"
-                        Style="{StaticResource SubtleButtonStyle}">
-                    <SymbolIcon Symbol="More" />
-                    <Button.Flyout>
-                        <MenuFlyout Placement="BottomEdgeAlignedRight">
-                            <MenuFlyoutItem x:Name="CopyMenuItem"
-                                            AutomationProperties.AutomationId="CopyTranscriptMenuItem"
-                                            Click="OnCopyClicked"
-                                            IsEnabled="False"
-                                            Text="全文をコピー" />
-                            <ToggleMenuFlyoutItem x:Name="AlwaysOnTopItem"
-                                                  AutomationProperties.AutomationId="AlwaysOnTopMenuItem"
-                                                  Click="OnAlwaysOnTopClicked"
-                                                  Text="常に手前に表示" />
-                        </MenuFlyout>
-                    </Button.Flyout>
-                </Button>
             </Grid>
 
-            <TextBlock x:Name="CaptureHint"
-                       Grid.Row="1"
-                       AutomationProperties.AutomationId="CaptureHint"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Margin="0,0,0,12"
-                       TextWrapping="Wrap"
-                       Visibility="Collapsed" />
-
-            <Border Grid.Row="2"
+            <Border Grid.Row="1"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
@@ -119,11 +75,29 @@
                         <RowDefinition Height="48" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock AutomationProperties.HeadingLevel="Level1"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Margin="16,12,16,4"
-                               Style="{StaticResource CaptionTextBlockStyle}"
-                               Text="字幕" />
+                    <StackPanel Margin="16,12,16,4" Spacing="4">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock AutomationProperties.HeadingLevel="Level1"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Text="字幕" />
+                            <TextBlock x:Name="StatusText"
+                                       Grid.Column="1"
+                                       AutomationProperties.AutomationId="CaptureStatus"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Style="{StaticResource CaptionTextBlockStyle}" />
+                        </Grid>
+                        <TextBlock x:Name="CaptureHint"
+                                   AutomationProperties.AutomationId="CaptureHint"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap"
+                                   Visibility="Collapsed" />
+                    </StackPanel>
 
                     <ScrollViewer x:Name="TranscriptScroll"
                                   Grid.Row="1"
@@ -199,7 +173,7 @@
             </Border>
 
             <InfoBar x:Name="SaveFeedback"
-                     Grid.Row="3"
+                     Grid.Row="2"
                      AutomationProperties.AutomationId="SaveFeedback"
                      Severity="Error" />
         </Grid>

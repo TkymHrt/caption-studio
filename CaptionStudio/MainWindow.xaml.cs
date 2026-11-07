@@ -15,6 +15,7 @@ public sealed partial class MainWindow : Window
     private enum CaptureState
     {
         Stopped,
+        Starting,
         WaitingForWindow,
         WaitingForSpeech,
         Capturing,
@@ -22,6 +23,7 @@ public sealed partial class MainWindow : Window
     }
 
     private const double FollowDistance = 16;
+    private const int LaunchGraceMilliseconds = 5_000;
     private readonly CaptionTranscript _transcript = new();
     private CancellationTokenSource? _capture;
     private int _captionWindowHandle;
@@ -50,11 +52,12 @@ public sealed partial class MainWindow : Window
 
     private void OnToolbarSizeChanged(object sender, SizeChangedEventArgs args)
     {
-        var narrow = args.NewSize.Width < 328;
-        Grid.SetRow(CaptureStatusGroup, narrow ? 1 : 0);
-        Grid.SetColumn(CaptureStatusGroup, narrow ? 0 : 1);
-        Grid.SetColumnSpan(CaptureStatusGroup, narrow ? 4 : 1);
-        CaptureStatusGroup.Margin = narrow ? new Thickness(0, 8, 0, 0) : new Thickness(4, 0, 0, 0);
+        var narrow = args.NewSize.Width < 288;
+        Grid.SetRow(TranscriptActions, narrow ? 1 : 0);
+        Grid.SetColumn(TranscriptActions, narrow ? 0 : 1);
+        Grid.SetColumnSpan(TranscriptActions, narrow ? 2 : 1);
+        TranscriptActions.HorizontalAlignment = narrow ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+        TranscriptActions.Margin = narrow ? new Thickness(0, 8, 0, 0) : default;
     }
 
     private async void OnCaptureClicked(object sender, RoutedEventArgs args)
@@ -69,7 +72,7 @@ public sealed partial class MainWindow : Window
         _capture = capture;
         CaptureButton.Content = "取得停止";
         ActionFeedback.Text = string.Empty;
-        SetCaptureStatus(CaptureState.WaitingForWindow);
+        SetCaptureStatus(CaptureState.Starting);
 
         try
         {
@@ -110,6 +113,8 @@ public sealed partial class MainWindow : Window
 
     private async Task CaptureAsync(CancellationToken cancellationToken)
     {
+        var firstRead = true;
+        var launchDeadline = 0L;
         while (!cancellationToken.IsCancellationRequested)
         {
             try
@@ -118,15 +123,30 @@ public sealed partial class MainWindow : Window
                 var (windowHandle, caption) = await Task.Run(LiveCaptionReader.Read, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
 
+                if (firstRead)
+                {
+                    firstRead = false;
+                    if (windowHandle == 0 && LiveCaptionReader.TryOpenWindow())
+                    {
+                        launchDeadline = Environment.TickCount64 + LaunchGraceMilliseconds;
+                    }
+                }
+
                 if (windowHandle != _captionWindowHandle)
                 {
                     _transcript.EndSegment();
                     _captionWindowHandle = windowHandle;
                 }
 
-                SetCaptureStatus(windowHandle == 0
-                    ? CaptureState.WaitingForWindow
-                    : string.IsNullOrWhiteSpace(caption) ? CaptureState.WaitingForSpeech : CaptureState.Capturing);
+                if (windowHandle == 0)
+                {
+                    SetCaptureStatus(Environment.TickCount64 < launchDeadline ? CaptureState.Starting : CaptureState.WaitingForWindow);
+                }
+                else
+                {
+                    launchDeadline = 0;
+                    SetCaptureStatus(string.IsNullOrWhiteSpace(caption) ? CaptureState.WaitingForSpeech : CaptureState.Capturing);
+                }
 
                 if (caption is not null && _transcript.Update(caption))
                 {
@@ -151,11 +171,12 @@ public sealed partial class MainWindow : Window
     {
         var (status, title, detail) = state switch
         {
-            CaptureState.WaitingForWindow => ("待機中", "ライブ キャプションの接続待ち", "Win + Ctrl + L でライブ キャプションを開いてください。"),
-            CaptureState.WaitingForSpeech => ("字幕待ち", "音声を待っています", "音声を再生すると、ここに字幕が表示されます。"),
+            CaptureState.Starting => ("起動中", "ライブ キャプションを起動中", "Windows の字幕ウィンドウが開くまでお待ちください。"),
+            CaptureState.WaitingForWindow => ("接続待ち", "ライブ キャプションの接続待ち", "Win + Ctrl + L でライブ キャプションを開いてください。"),
+            CaptureState.WaitingForSpeech => ("音声待ち", "音声を待っています", "音声を再生すると、ここに字幕が表示されます。"),
             CaptureState.Capturing => ("取得中", string.Empty, string.Empty),
             CaptureState.Reconnecting => ("再接続中", "ライブ キャプションを再接続中", "字幕を読み取れません。接続が戻るまでお待ちください。"),
-            _ => ("停止中", "字幕の取得を始める", "Win + Ctrl + L でライブ キャプションを開き、［取得開始］を押してください。"),
+            _ => ("停止中", "字幕の取得を始める", "［取得開始］を押すと、Windows のライブ キャプションが開きます。"),
         };
 
         if (StatusText.Text == status)
@@ -164,7 +185,6 @@ public sealed partial class MainWindow : Window
         }
 
         StatusText.Text = status;
-        LiveStatusDot.Visibility = state == CaptureState.Capturing ? Visibility.Visible : Visibility.Collapsed;
         EmptyTranscriptTitle.Text = title;
         EmptyTranscriptDetail.Text = detail;
 
@@ -180,7 +200,7 @@ public sealed partial class MainWindow : Window
         var wasNearLatest = IsNearLatest();
         TranscriptText.Text = _transcript.Text;
         EmptyTranscriptState.Visibility = Visibility.Collapsed;
-        CopyMenuItem.IsEnabled = true;
+        CopyButton.IsEnabled = true;
         SaveButton.IsEnabled = !_saving;
 
         TranscriptScroll.UpdateLayout();
@@ -223,14 +243,6 @@ public sealed partial class MainWindow : Window
         catch (COMException)
         {
             ShowError("字幕をコピーできませんでした。もう一度お試しください。");
-        }
-    }
-
-    private void OnAlwaysOnTopClicked(object sender, RoutedEventArgs args)
-    {
-        if (AppWindow.Presenter is OverlappedPresenter presenter)
-        {
-            presenter.IsAlwaysOnTop = AlwaysOnTopItem.IsChecked;
         }
     }
 
